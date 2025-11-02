@@ -8,6 +8,8 @@ class Funcionario(ABC):
         self.cpf = cpf
         self.salarioBase = salarioBase
         self.registroDePonto = []
+        self.estaAtivo = True
+        self.estaDeFerias = False
         
     def _pegarTimeAtual_(self):
         return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -32,6 +34,12 @@ class Funcionario(ABC):
         else:
             for registro in self.registroDePonto:
                 print(f"Tipo: {registro['tipo']}\nHorario: {registro['horario']}")
+        if not self.estaAtivo:
+            print("Status = Inativo")
+        elif self.estaDeFerias:
+            print("Status: Em Ferias")
+        else:
+            print("Status: Ativo")
     
     @abstractmethod
     def calcularSalario(self, horasExtras):
