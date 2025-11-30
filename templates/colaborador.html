@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal do Colaborador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <style>
+        body { background-color: #f8f9fa; }
+        .card-ponto { transition: all 0.3s; }
+        .card-ponto:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-person-badge me-2"></i> Área do Colaborador
+            </span>
+            <div class="d-flex align-items-center text-white">
+                <span class="me-3 d-none d-md-block">Olá, {{ func.nome }}</span>
+                <a href="/logout" class="btn btn-outline-light btn-sm">Sair</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row g-4">
+            
+            <div class="col-md-5">
+                <div class="card shadow border-0 h-100">
+                    <div class="card-body text-center p-5">
+                        <h5 class="text-muted mb-4">Registro de Ponto</h5>
+                        
+                        <div class="display-4 fw-bold text-dark mb-2" id="relogio">--:--:--</div>
+                        <p class="text-muted mb-5">{{ func.tipo_func.capitalize() }} | Matrícula: {{ func.matricula }}</p>
+                        
+                        <div class="d-grid gap-3">
+                            <form action="/bater_ponto/{{ func.id }}/entrada" method="POST">
+                                <button class="btn btn-success btn-lg w-100 py-3 fw-bold card-ponto">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i> REGISTRAR ENTRADA
+                                </button>
+                            </form>
+
+                            <form action="/bater_ponto/{{ func.id }}/saida" method="POST">
+                                <button class="btn btn-danger btn-lg w-100 py-3 fw-bold card-ponto">
+                                    <i class="bi bi-box-arrow-left me-2"></i> REGISTRAR SAÍDA
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="mb-0 text-secondary"><i class="bi bi-clock-history me-2"></i>Meus Últimos Pontos</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-striped mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Data</th>
+                                    <th>Entrada</th>
+                                    <th>Saída</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ponto in pontos %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ ponto.data }}</td>
+                                    <td class="text-success">{{ ponto.hora_entrada or '--:--' }}</td>
+                                    <td class="text-danger">{{ ponto.hora_saida or '--:--' }}</td>
+                                    <td>
+                                        {% if ponto.hora_entrada and ponto.hora_saida %}
+                                            <span class="badge bg-secondary rounded-pill">Fechado</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark rounded-pill">Aberto</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        Nenhum registro recente.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function atualizar() {
+            const agora = new Date();
+            document.getElementById('relogio').innerText = agora.toLocaleTimeString('pt-BR');
+        }
+        setInterval(atualizar, 1000);
+        atualizar();
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

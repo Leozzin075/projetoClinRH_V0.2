@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<div class="container-fluid p-4">
+
+    <div class="mb-4">
+        <h4 class="text-secondary mb-1">
+            <i class="bi bi-cash-stack me-2"></i> Geração de Folha de Pagamento
+        </h4>
+        <small class="text-muted">Configure as horas extras dos médicos e gere a folha de pagamento do mês</small>
+    </div>
+
+    <form action="/folha" method="POST">
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                
+                <h6 class="card-title text-secondary mb-3">
+                    <i class="bi bi-clock-history text-primary me-2"></i> Mapa de Horas Extras (Apenas Médicos)
+                </h6>
+
+                <ul class="list-group list-group-flush rounded">
+                    
+                    {% for medico in medicos %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-light border-0 mb-2 rounded p-3">
+                        
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-white p-2 me-3 text-primary shadow-sm">
+                                    <i class="bi bi-heart-pulse-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ medico.nome }}</div>
+                                    <div class="small text-muted">Mat: {{ medico.matricula }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                            <div class="input-group shadow-sm" style="width: 150px;">
+                                <span class="input-group-text bg-white border-0 text-muted small">Hrs</span>
+                                <input type="number" step="0.5" class="form-control border-0" 
+                                       name="horas_{{ medico.id }}" placeholder="0" min="0">
+                            </div>
+                        </div>
+                    </li>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-emoji-frown text-muted fs-4"></i>
+                        <p class="text-muted mt-2 mb-0">Nenhum médico ativo encontrado para lançamento de horas.</p>
+                    </div>
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-dark w-100 py-3 fw-bold shadow-sm">
+            <i class="bi bi-calculator me-2"></i> Calcular e Gerar Folha
+        </button>
+
+    </form>
+
+    {% if resultado %}
+    <div class="mt-5" id="resultado-folha">
+        <h4 class="text-secondary mb-3">
+            <i class="bi bi-receipt me-2"></i> Resumo da Folha
+        </h4>
+        
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light text-secondary small text-uppercase">
+                        <tr>
+                            <th class="ps-4">Funcionário</th>
+                            <th>Cargo</th>
+                            <th>Salário Base</th>
+                            <th>Extras / Adicionais</th>
+                            <th class="pe-4 text-end">A Receber (Líquido)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in resultado %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-dark">{{ item.nome }}</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    {{ item.cargo }}
+                                </span>
+                            </td>
+                            <td class="text-muted">R$ {{ "%.2f"|format(item.salario_base) }}</td>
+                            
+                            <td>
+                                {% if item.horas_extras != '-' %}
+                                    <span class="text-primary small fw-bold">+ {{ item.horas_extras }}h extras</span>
+                                {% elif item.cargo == 'Enfermeiro' %}
+                                    <span class="text-success small fw-bold">Adicional Noturno</span>
+                                {% else %}
+                                    <span class="text-muted small">-</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="pe-4 text-end">
+                                <span class="text-success fw-bold fs-5">
+                                    R$ {{ "%.2f"|format(item.salario_liquido) }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="4" class="text-end fw-bold text-secondary">TOTAL DA FOLHA:</td>
+                            <td class="pe-4 text-end fw-bold text-dark fs-5">
+                                {% set total = resultado | sum(attribute='salario_liquido') %}
+                                R$ {{ "%.2f"|format(total) }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

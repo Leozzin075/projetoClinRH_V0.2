@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<div class="container-fluid p-4">
+
+    <div class="mb-4">
+        <h4 class="text-secondary mb-1">Folha de Ponto</h4>
+        <small class="text-muted">Registre e visualize os pontos dos funcionários</small>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            
+            <h6 class="card-title text-secondary mb-3">
+                <i class="bi bi-clock text-primary me-2"></i> Registrar Ponto
+            </h6>
+
+            <form action="/registrar_ponto" method="POST">
+                <div class="row g-3 align-items-end">
+                    
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small">Funcionário</label>
+                        <select class="form-select bg-light border-0" name="funcionario_id">
+                            <option selected disabled>Selecione</option>
+                            <option value="1">Dr. Carlos Silva</option>
+                            <option value="2">Ana Paula Santos</option>
+                            <option value="3">João Oliveira</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold small">Data</label>
+                        <input type="date" class="form-control bg-light border-0" name="data" value="2025-11-25">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold small">Entrada</label>
+                        <input type="time" class="form-control bg-light border-0" name="entrada">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold small">Saída</label>
+                        <input type="time" class="form-control bg-light border-0" name="saida">
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-dark w-100 fw-bold">
+                            <i class="bi bi-clock-history me-2"></i> Registrar
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        
+        <div class="d-flex align-items-center">
+            <i class="bi bi-funnel text-muted me-2"></i>
+            <span class="fw-bold small me-2">Filtrar por:</span>
+            <select class="form-select form-select-sm border-0 shadow-sm bg-white" style="width: 200px;">
+                <option selected>Todos os funcionários</option>
+                <option value="1">Dr. Carlos Silva</option>
+                </select>
+        </div>
+
+        <div class="text-muted small">
+            <span class="me-3">
+                <i class="bi bi-graph-up-arrow text-primary me-1"></i> Total de Horas: <strong>36.00h</strong>
+            </span>
+            <span>
+                <i class="bi bi-calendar-check text-success me-1"></i> Registros: <span class="badge bg-black rounded-pill">4</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h6 class="mb-0 text-secondary">Registros de Ponto</h6>
+        </div>
+        
+        <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+            
+            <ul class="list-group list-group-flush">
+                
+                <li class="list-group-item p-3 border-bottom-0 border-top">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center" style="width: 30%;">
+                            <i class="bi bi-circle-fill text-success me-3 small" style="font-size: 8px;"></i>
+                            <div>
+                                <div class="fw-bold text-dark">Dr. Carlos Silva</div>
+                                <div class="small text-muted">Mat: MED001</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-4 text-secondary small">
+                            <div>
+                                <i class="bi bi-calendar3 me-1"></i> 21/11/2025
+                            </div>
+                            <div>
+                                <i class="bi bi-box-arrow-in-right text-primary me-1"></i> 08:00
+                            </div>
+                            <div>
+                                <i class="bi bi-box-arrow-left text-danger me-1"></i> 17:00
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="badge bg-success rounded-pill px-3 py-2">9.00h</span>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="list-group-item p-3 border-top bg-light-subtle">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center" style="width: 30%;">
+                            <i class="bi bi-circle-fill text-success me-3 small" style="font-size: 8px;"></i>
+                            <div>
+                                <div class="fw-bold text-dark">Ana Paula Santos</div>
+                                <div class="small text-muted">Mat: ENF001</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-4 text-secondary small">
+                            <div><i class="bi bi-calendar3 me-1"></i> 21/11/2025</div>
+                            <div><i class="bi bi-box-arrow-in-right text-primary me-1"></i> 22:00</div>
+                            <div><i class="bi bi-box-arrow-left text-danger me-1"></i> 06:00</div>
+                        </div>
+
+                        <div><span class="badge bg-success rounded-pill px-3 py-2">8.00h</span></div>
+                    </div>
+                </li>
+
+                <li class="list-group-item p-3 border-top">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center" style="width: 30%;">
+                            <i class="bi bi-circle-fill text-success me-3 small" style="font-size: 8px;"></i>
+                            <div>
+                                <div class="fw-bold text-dark">João Oliveira</div>
+                                <div class="small text-muted">Mat: ADM001</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-4 text-secondary small">
+                            <div><i class="bi bi-calendar3 me-1"></i> 21/11/2025</div>
+                            <div><i class="bi bi-box-arrow-in-right text-primary me-1"></i> 09:00</div>
+                            <div><i class="bi bi-box-arrow-left text-danger me-1"></i> 18:00</div>
+                        </div>
+
+                        <div><span class="badge bg-success rounded-pill px-3 py-2">9.00h</span></div>
+                    </div>
+                </li>
+                 <li class="list-group-item p-3 border-top">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center" style="width: 30%;">
+                            <i class="bi bi-circle-fill text-success me-3 small" style="font-size: 8px;"></i>
+                            <div>
+                                <div class="fw-bold text-dark">Dr. Carlos Silva</div>
+                                <div class="small text-muted">Mat: MED001</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-4 text-secondary small">
+                            <div><i class="bi bi-calendar3 me-1"></i> 20/11/2025</div>
+                            <div><i class="bi bi-box-arrow-in-right text-primary me-1"></i> 08:00</div>
+                            <div><i class="bi bi-box-arrow-left text-danger me-1"></i> 18:00</div>
+                        </div>
+
+                        <div><span class="badge bg-success rounded-pill px-3 py-2">10.00h</span></div>
+                    </div>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

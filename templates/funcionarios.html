@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<div class="container-fluid p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        
+        <h4 class="text-secondary mb-0">
+            <i class="bi bi-people-fill me-2"></i> {{ titulo_pagina }}
+        </h4>
+        
+        {% if filtro_atual == 'demitidos' %}
+            <a href="/funcionarios" class="btn btn-outline-primary shadow-sm">
+                <i class="bi bi-eye me-2"></i> Ver Ativos
+            </a>
+        {% else %}
+            <a href="/funcionarios?ver=demitidos" class="btn btn-outline-secondary shadow-sm">
+                <i class="bi bi-eye-slash me-2"></i> Ver Demitidos
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="bg-white p-3 rounded shadow-sm mb-4">
+        <div class="input-group">
+            <input type="text" class="form-control bg-light border-0" placeholder="Digite a matrícula para buscar...">
+            <button class="btn btn-dark px-4" type="button">
+                <i class="bi bi-search me-2"></i>Buscar
+            </button>
+        </div>
+    </div>
+
+    <small class="text-muted d-block mb-3">Exibindo {{ funcionarios|length }} funcionário(s)</small>
+
+    <div class="row">
+        
+        {% for func in funcionarios %}
+        
+        <div class="col-xl-6 col-md-12 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center">
+                            
+                            <div class="rounded-circle bg-light p-3 me-3 
+                                {% if func.tipo_func == 'medico' %} text-primary 
+                                {% elif func.tipo_func == 'enfermeiro' %} text-success 
+                                {% else %} text-warning {% endif %}">
+                                
+                                {% if func.tipo_func == 'medico' %} <i class="bi bi-heart-pulse-fill fs-4"></i>
+                                {% elif func.tipo_func == 'enfermeiro' %} <i class="bi bi-activity fs-4"></i>
+                                {% else %} <i class="bi bi-briefcase-fill fs-4"></i>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <h5 class="card-title mb-0 fw-bold">{{ func.nome }}</h5>
+                                <small class="text-muted">Matrícula: {{ func.matricula }}</small>
+                            </div>
+                        </div>
+                        
+                        {% if not func.esta_ativo %}
+                            <span class="badge bg-danger rounded-pill px-3">Inativo</span>
+                        {% elif func.em_ferias %}
+                            <span class="badge bg-warning text-dark rounded-pill px-3">Em Férias</span>
+                        {% else %}
+                            <span class="badge bg-success rounded-pill px-3">Ativo</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-12">
+                            <span class="text-muted small">Tipo:</span> 
+                            <span class="fw-medium">{{ func.tipo_func.capitalize() }}</span>
+                        </div>
+                        <div class="col-12">
+                            <span class="text-muted small">Salário Base:</span> 
+                            <span class="fw-medium">R$ {{ "%.2f"|format(func.salario_base) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-light p-2 rounded mb-3 small">
+                        <div class="row">
+                            
+                            {% if func.tipo_func == 'medico' %}
+                                <div class="col-6 mb-1">
+                                    <span class="text-muted">CRM:</span> <br> <strong>{{ func.crm }}</strong>
+                                </div>
+                                <div class="col-6 mb-1">
+                                    <span class="text-muted">Especialidade:</span> <br> <strong>{{ func.especialidade }}</strong>
+                                </div>
+                                <div class="col-12">
+                                    <span class="text-muted">Hora Extra:</span> <strong>R$ {{ func.valor_hora_extra }}</strong>
+                                </div>
+
+                            {% elif func.tipo_func == 'enfermeiro' %}
+                                <div class="col-6 mb-1">
+                                    <span class="text-muted">COREN:</span> <br> <strong>{{ func.coren }}</strong>
+                                </div>
+                                <div class="col-6 mb-1">
+                                    <span class="text-muted">Turno:</span> <br> <strong>{{ func.turno }}</strong>
+                                </div>
+
+                            {% else %} <div class="col-12">
+                                    <span class="text-muted">Cargo:</span> <br> <strong>{{ func.cargo }}</strong>
+                                </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        
+                        <a href="/editar/{{ func.id }}" class="btn btn-outline-secondary btn-sm flex-grow-1">
+                            <i class="bi bi-pencil-square me-1"></i> Editar
+                        </a>
+                        
+                        {% if func.esta_ativo %}
+                            <form action="/ferias/{{ func.id }}" method="POST" style="display:inline;" class="flex-grow-1">
+                                {% if func.em_ferias %}
+                                    <button type="submit" class="btn btn-warning btn-sm w-100">
+                                        <i class="bi bi-briefcase me-1"></i> Voltar
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm w-100">
+                                        <i class="bi bi-airplane me-1"></i> Férias
+                                    </button>
+                                {% endif %}
+                            </form>
+                        {% endif %}
+                        
+                        {% if func.esta_ativo %}
+                            <form action="/demitir/{{ func.id }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm px-3" onclick="return confirm('Tem certeza que deseja demitir este funcionário?')">
+                                    Demitir
+                                </button>
+                            </form>
+                        {% else %}
+                            <button class="btn btn-secondary btn-sm px-3" disabled>Inativo</button>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <div class="col-12 text-center mt-5">
+            <div class="py-5">
+                <i class="bi bi-folder-x text-muted" style="font-size: 3rem;"></i>
+                <p class="text-muted mt-3">Nenhum funcionário encontrado neste filtro.</p>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div> </div>
+{% endblock %}

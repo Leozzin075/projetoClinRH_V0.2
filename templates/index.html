@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+    
+    <div class="container-fluid">
+        <h2 class="mb-4">Painel de Controle</h2>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-header">Funcionários Ativos</div>
+                    <div class="card-body">
+                        <h5 class="card-title">15</h5>
+                        <p class="card-text">Colaboradores registrados na clínica.</p>
+                    </div>
+                </div>
+            </div>
+            
+             <div class="col-md-4">
+                <div class="card text-dark bg-warning mb-3">
+                    <div class="card-header">Em Férias</div>
+                    <div class="card-body">
+                        <h5 class="card-title">2</h5>
+                        <p class="card-text">Colaboradores ausentes no momento.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+{% endblock %}

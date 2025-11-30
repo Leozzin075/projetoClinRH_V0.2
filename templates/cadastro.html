@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<div class="container-fluid p-4">
+    
+    <h4 class="mb-4 text-secondary">
+        {% if func_edit %} Editar Funcionário {% else %} Cadastrar Novo Funcionário {% endif %}
+    </h4>
+
+    <div class="bg-white p-4 rounded shadow-sm">
+        
+        <form action="{{ url_for('editar', id=func_edit.id) if func_edit else '/cadastrar' }}" method="POST">
+            
+            <div class="row g-3 mb-3">
+                
+                <div class="col-md-3">
+                    <label for="tipo" class="form-label fw-bold small">Tipo de Funcionário</label>
+                    {% if func_edit %}
+                        <input type="hidden" name="tipo" id="tipo" value="{{ func_edit.tipo_func }}">
+                        <input type="text" class="form-control bg-light border-0" value="{{ func_edit.tipo_func.capitalize() }}" readonly>
+                    {% else %}
+                        <select class="form-select bg-light border-0" id="tipo" name="tipo" onchange="alternarCampos()">
+                            <option value="medico">Médico</option>
+                            <option value="enfermeiro">Enfermeiro</option>
+                            <option value="admin">Administrativo</option>
+                        </select>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-3">
+                    <label for="matricula" class="form-label fw-bold small">Matrícula</label>
+                    <input type="text" class="form-control bg-light border-0" id="matricula" name="matricula" 
+                           value="{{ func_edit.matricula if func_edit else '' }}" placeholder="Ex: FUN001">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="nome" class="form-label fw-bold small">Nome Completo</label>
+                    <input type="text" class="form-control bg-light border-0" id="nome" name="nome" 
+                           value="{{ func_edit.nome if func_edit else '' }}" placeholder="Nome">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="salario" class="form-label fw-bold small">Salário Base (R$)</label>
+                    <input type="number" step="0.01" class="form-control bg-light border-0" id="salario" name="salario" 
+                           value="{{ func_edit.salario_base if func_edit else '' }}" placeholder="0.00">
+                </div>
+            </div>
+            
+            <div class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <label for="cpf" class="form-label fw-bold small">CPF</label>
+                    <input type="text" class="form-control bg-light border-0" id="cpf" name="cpf" 
+                           value="{{ func_edit.cpf if func_edit else '' }}" placeholder="000.000.000-00">
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4 p-3 rounded bg-light" id="campos-medico" style="display: none;">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small text-secondary">CRM</label>
+                    <input type="text" class="form-control border-0" name="crm" value="{{ func_edit.crm if func_edit else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small text-secondary">Especialidade</label>
+                    <input type="text" class="form-control border-0" name="especialidade" value="{{ func_edit.especialidade if func_edit else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small text-secondary">Valor Hora Extra (R$)</label>
+                    <input type="number" step="0.01" class="form-control border-0" name="hora_extra" value="{{ func_edit.valor_hora_extra if func_edit else '' }}">
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4 p-3 rounded bg-light" id="campos-enfermeiro" style="display: none;">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small text-secondary">COREN</label>
+                    <input type="text" class="form-control border-0" name="coren" value="{{ func_edit.coren if func_edit else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small text-secondary">Turno</label>
+                    <select class="form-select border-0" name="turno">
+                        <option value="diurno" {% if func_edit and func_edit.turno == 'diurno' %}selected{% endif %}>Diurno</option>
+                        <option value="noturno" {% if func_edit and func_edit.turno == 'noturno' %}selected{% endif %}>Noturno</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small text-secondary">Adicional Noturno (decimal)</label>
+                    <input type="number" step="0.01" class="form-control border-0" name="adicional" value="{{ func_edit.adicional_noturno if func_edit else '0.2' }}">
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4 p-3 rounded bg-light" id="campos-admin" style="display: none;">
+                <div class="col-md-12">
+                    <label class="form-label fw-bold small text-secondary">Cargo</label>
+                    <input type="text" class="form-control border-0" name="cargo" value="{{ func_edit.cargo if func_edit else '' }}">
+                </div>
+            </div>
+
+            <button type="submit" class="btn {% if func_edit %}btn-primary{% else %}btn-dark{% endif %} w-100 py-2 fw-bold">
+                {% if func_edit %}
+                    <i class="bi bi-pencil-square me-2"></i> Salvar Alterações
+                {% else %}
+                    <i class="bi bi-person-plus me-2"></i> Cadastrar Funcionário
+                {% endif %}
+            </button>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    function alternarCampos() {
+        // Tenta pegar o valor do select ou do input hidden (se for edição)
+        var selectTipo = document.getElementById("tipo");
+        var tipo = selectTipo.value; 
+        
+        document.getElementById("campos-medico").style.display = "none";
+        document.getElementById("campos-enfermeiro").style.display = "none";
+        document.getElementById("campos-admin").style.display = "none";
+
+        if (tipo === 'medico') {
+            document.getElementById("campos-medico").style.display = "flex";
+        } else if (tipo === 'enfermeiro') {
+            document.getElementById("campos-enfermeiro").style.display = "flex";
+        } else {
+            document.getElementById("campos-admin").style.display = "flex";
+        }
+    }
+
+    // Se estivermos editando, roda a função ao carregar a página para mostrar os campos certos
+    window.onload = function() {
+        alternarCampos();
+    };
+</script>
+
+{% endblock %}
