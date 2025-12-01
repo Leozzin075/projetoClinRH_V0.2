@@ -3,49 +3,59 @@
 {% block conteudo %}
 <div class="container-fluid p-4">
 
+    <!-- Cabeçalho -->
     <div class="mb-4">
-        <h4 class="text-secondary mb-1">Folha de Ponto</h4>
-        <small class="text-muted">Registre e visualize os pontos dos funcionários</small>
+        <h4 class="text-secondary mb-1">
+            <i class="bi bi-clock me-2"></i> Folha de Ponto
+        </h4>
+        <small class="text-muted">Registre manualmente ou visualize o histórico de pontos</small>
     </div>
 
+    <!-- CARD 1: REGISTRAR PONTO MANUAL (APENAS ADMIN) -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-4">
             
             <h6 class="card-title text-secondary mb-3">
-                <i class="bi bi-clock text-primary me-2"></i> Registrar Ponto
+                <i class="bi bi-pencil-square text-primary me-2"></i> Lançamento Manual
             </h6>
 
-            <form action="/registrar_ponto" method="POST">
+            <form action="/ponto" method="POST">
                 <div class="row g-3 align-items-end">
                     
+                    <!-- Selecionar Funcionário -->
                     <div class="col-md-4">
                         <label class="form-label fw-bold small">Funcionário</label>
-                        <select class="form-select bg-light border-0" name="funcionario_id">
-                            <option selected disabled>Selecione</option>
-                            <option value="1">Dr. Carlos Silva</option>
-                            <option value="2">Ana Paula Santos</option>
-                            <option value="3">João Oliveira</option>
+                        <select class="form-select bg-light border-0" name="funcionario_id" required>
+                            <option selected disabled value="">Selecione...</option>
+                            {% for func in funcionarios %}
+                                <option value="{{ func.id }}">{{ func.nome }} ({{ func.matricula }})</option>
+                            {% endfor %}
                         </select>
                     </div>
 
+                    <!-- Data -->
                     <div class="col-md-2">
                         <label class="form-label fw-bold small">Data</label>
-                        <input type="date" class="form-control bg-light border-0" name="data" value="2025-11-25">
+                        <!-- Value padrão: Data de hoje via JS ou Python seria ideal, mas deixamos vazio para forçar escolha -->
+                        <input type="date" class="form-control bg-light border-0" name="data" required>
                     </div>
 
+                    <!-- Hora Entrada -->
                     <div class="col-md-2">
                         <label class="form-label fw-bold small">Entrada</label>
                         <input type="time" class="form-control bg-light border-0" name="entrada">
                     </div>
 
+                    <!-- Hora Saída -->
                     <div class="col-md-2">
                         <label class="form-label fw-bold small">Saída</label>
                         <input type="time" class="form-control bg-light border-0" name="saida">
                     </div>
 
+                    <!-- Botão Registrar -->
                     <div class="col-md-2">
-                        <button type="submit" class="btn btn-dark w-100 fw-bold">
-                            <i class="bi bi-clock-history me-2"></i> Registrar
+                        <button type="submit" class="btn btn-dark w-100 fw-bold shadow-sm">
+                            <i class="bi bi-check-lg me-2"></i> Salvar
                         </button>
                     </div>
 
@@ -54,125 +64,128 @@
         </div>
     </div>
 
+    <!-- BARRA DE FILTROS E ESTATÍSTICAS -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         
-        <div class="d-flex align-items-center">
-            <i class="bi bi-funnel text-muted me-2"></i>
-            <span class="fw-bold small me-2">Filtrar por:</span>
-            <select class="form-select form-select-sm border-0 shadow-sm bg-white" style="width: 200px;">
-                <option selected>Todos os funcionários</option>
-                <option value="1">Dr. Carlos Silva</option>
-                </select>
+        <!-- Lado Esquerdo: Filtro com Auto-Reload -->
+        <div class="d-flex align-items-center bg-white p-2 rounded shadow-sm">
+            <i class="bi bi-funnel text-muted mx-2"></i>
+            <span class="fw-bold small me-2">Filtrar:</span>
+            <select class="form-select form-select-sm border-0 bg-transparent" style="width: 200px; cursor: pointer;" 
+                    onchange="window.location.href='/ponto?filtro_id=' + this.value">
+                
+                <option value="todos">Todos os funcionários</option>
+                
+                {% for func in funcionarios %}
+                    <option value="{{ func.id }}" {% if filtro_atual == func.id|string %}selected{% endif %}>
+                        {{ func.nome }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
 
+        <!-- Lado Direito: Totais -->
         <div class="text-muted small">
-            <span class="me-3">
-                <i class="bi bi-graph-up-arrow text-primary me-1"></i> Total de Horas: <strong>36.00h</strong>
-            </span>
             <span>
-                <i class="bi bi-calendar-check text-success me-1"></i> Registros: <span class="badge bg-black rounded-pill">4</span>
+                <i class="bi bi-calendar-check text-success me-1"></i> Registros: 
+                <span class="badge bg-dark rounded-pill">{{ pontos|length }}</span>
             </span>
         </div>
     </div>
 
+    <!-- CARD 2: LISTA DE REGISTROS (HISTÓRICO) -->
     <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h6 class="mb-0 text-secondary">Registros de Ponto</h6>
+        <div class="card-header bg-white py-3 border-bottom">
+            <h6 class="mb-0 text-secondary">Histórico de Registros</h6>
         </div>
         
-        <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+        <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
             
             <ul class="list-group list-group-flush">
                 
-                <li class="list-group-item p-3 border-bottom-0 border-top">
+                {% for ponto in pontos %}
+                <li class="list-group-item p-3 border-bottom-0 border-top hover-effect">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center" style="width: 30%;">
-                            <i class="bi bi-circle-fill text-success me-3 small" style="font-size: 8px;"></i>
+                        
+                        <!-- Info do Funcionário -->
+                        <div class="d-flex align-items-center" style="width: 35%;">
+                            <!-- Ícone Colorido -->
+                            <div class="rounded-circle me-3 p-2 d-flex justify-content-center align-items-center shadow-sm 
+                                {% if ponto.funcionario.tipo_func == 'medico' %} bg-primary-subtle text-primary
+                                {% elif ponto.funcionario.tipo_func == 'enfermeiro' %} bg-success-subtle text-success
+                                {% else %} bg-warning-subtle text-warning {% endif %}" 
+                                style="width: 40px; height: 40px;">
+                                <span class="fw-bold">{{ ponto.funcionario.nome[0] }}</span>
+                            </div>
+                            
                             <div>
-                                <div class="fw-bold text-dark">Dr. Carlos Silva</div>
-                                <div class="small text-muted">Mat: MED001</div>
+                                <div class="fw-bold text-dark">{{ ponto.funcionario.nome }}</div>
+                                <div class="small text-muted">
+                                    {{ ponto.funcionario.tipo_func.capitalize() }} | Mat: {{ ponto.funcionario.matricula }}
+                                </div>
                             </div>
                         </div>
 
-                        <div class="d-flex align-items-center gap-4 text-secondary small">
-                            <div>
-                                <i class="bi bi-calendar3 me-1"></i> 21/11/2025
+                        <!-- Detalhes do Ponto -->
+                        <div class="d-flex align-items-center gap-5 text-secondary small">
+                            <div class="d-flex align-items-center" title="Data">
+                                <i class="bi bi-calendar3 me-2 text-muted"></i> 
+                                <span class="fw-medium">{{ ponto.data }}</span>
                             </div>
-                            <div>
-                                <i class="bi bi-box-arrow-in-right text-primary me-1"></i> 08:00
+                            
+                            <div class="d-flex align-items-center" title="Entrada">
+                                <i class="bi bi-box-arrow-in-right text-success me-2"></i> 
+                                <span class="fw-bold text-dark">{{ ponto.hora_entrada or '--:--' }}</span>
                             </div>
-                            <div>
-                                <i class="bi bi-box-arrow-left text-danger me-1"></i> 17:00
+                            
+                            <div class="d-flex align-items-center" title="Saída">
+                                <i class="bi bi-box-arrow-left text-danger me-2"></i> 
+                                <span class="fw-bold text-dark">{{ ponto.hora_saida or '--:--' }}</span>
                             </div>
                         </div>
 
-                        <div>
-                            <span class="badge bg-success rounded-pill px-3 py-2">9.00h</span>
+                        <!-- Status / Total Horas (Simples) -->
+                        <div style="width: 100px; text-align: right;">
+                            {% if ponto.hora_entrada and ponto.hora_saida %}
+                                <span class="badge bg-success-subtle text-success border border-success rounded-pill px-3">
+                                    Fechado
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning-subtle text-warning border border-warning rounded-pill px-3">
+                                    Em aberto
+                                </span>
+                            {% endif %}
                         </div>
                     </div>
                 </li>
-
-                <li class="list-group-item p-3 border-top bg-light-subtle">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center" style="width: 30%;">
-                            <i class="bi bi-circle-fill text-success me-3 small" style="font-size: 8px;"></i>
-                            <div>
-                                <div class="fw-bold text-dark">Ana Paula Santos</div>
-                                <div class="small text-muted">Mat: ENF001</div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-4 text-secondary small">
-                            <div><i class="bi bi-calendar3 me-1"></i> 21/11/2025</div>
-                            <div><i class="bi bi-box-arrow-in-right text-primary me-1"></i> 22:00</div>
-                            <div><i class="bi bi-box-arrow-left text-danger me-1"></i> 06:00</div>
-                        </div>
-
-                        <div><span class="badge bg-success rounded-pill px-3 py-2">8.00h</span></div>
-                    </div>
-                </li>
-
-                <li class="list-group-item p-3 border-top">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center" style="width: 30%;">
-                            <i class="bi bi-circle-fill text-success me-3 small" style="font-size: 8px;"></i>
-                            <div>
-                                <div class="fw-bold text-dark">João Oliveira</div>
-                                <div class="small text-muted">Mat: ADM001</div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-4 text-secondary small">
-                            <div><i class="bi bi-calendar3 me-1"></i> 21/11/2025</div>
-                            <div><i class="bi bi-box-arrow-in-right text-primary me-1"></i> 09:00</div>
-                            <div><i class="bi bi-box-arrow-left text-danger me-1"></i> 18:00</div>
-                        </div>
-
-                        <div><span class="badge bg-success rounded-pill px-3 py-2">9.00h</span></div>
-                    </div>
-                </li>
-                 <li class="list-group-item p-3 border-top">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center" style="width: 30%;">
-                            <i class="bi bi-circle-fill text-success me-3 small" style="font-size: 8px;"></i>
-                            <div>
-                                <div class="fw-bold text-dark">Dr. Carlos Silva</div>
-                                <div class="small text-muted">Mat: MED001</div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-4 text-secondary small">
-                            <div><i class="bi bi-calendar3 me-1"></i> 20/11/2025</div>
-                            <div><i class="bi bi-box-arrow-in-right text-primary me-1"></i> 08:00</div>
-                            <div><i class="bi bi-box-arrow-left text-danger me-1"></i> 18:00</div>
-                        </div>
-
-                        <div><span class="badge bg-success rounded-pill px-3 py-2">10.00h</span></div>
-                    </div>
-                </li>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-clock-history display-1 text-light mb-3"></i>
+                    <p class="text-muted">Nenhum registro de ponto encontrado para este filtro.</p>
+                </div>
+                {% endfor %}
 
             </ul>
         </div>
     </div>
 </div>
+
+<!-- Estilo extra só pra essa página -->
+<style>
+    .hover-effect:hover {
+        background-color: #f8f9fa;
+        cursor: default;
+    }
+</style>
+
+<!-- Script para preencher a data de hoje automaticamente no formulário -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputData = document.querySelector('input[name="data"]');
+        if (inputData) {
+            inputData.valueAsDate = new Date();
+        }
+    });
+</script>
+
 {% endblock %}

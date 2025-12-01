@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<style>
+    /* Estilo dos Cards de Log */
+    .log-card {
+        background: white;
+        border: none;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-left: 5px solid #ccc; /* Cor padrão */
+    }
+
+    .log-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    /* Cores baseadas no tipo de ação */
+    .border-add { border-left-color: #198754 !important; }   /* Verde (Success) */
+    .bg-icon-add { background-color: #d1e7dd; color: #198754; }
+
+    .border-edit { border-left-color: #ffc107 !important; }   /* Amarelo (Warning) */
+    .bg-icon-edit { background-color: #fff3cd; color: #ffc107; }
+
+    .border-del { border-left-color: #dc3545 !important; }    /* Vermelho (Danger) */
+    .bg-icon-del { background-color: #f8d7da; color: #dc3545; }
+
+    .border-ferias { border-left-color: #6f42c1 !important; } /* Roxo */
+    .bg-icon-ferias { background-color: #e0cffc; color: #6f42c1; }
+    
+    .border-ponto { border-left-color: #0d6efd !important; }  /* Azul (Primary) */
+    .bg-icon-ponto { background-color: #cfe2ff; color: #0d6efd; }
+
+    .icon-box {
+        width: 45px;
+        height: 45px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        margin-right: 15px;
+    }
+
+    .search-bar {
+        background: white;
+        border-radius: 8px;
+        padding: 10px 15px;
+        border: 1px solid #dee2e6;
+    }
+
+    .search-bar input {
+        border: none;
+        outline: none;
+        width: 100%;
+        background: transparent;
+    }
+</style>
+
+<div class="container-fluid p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="text-secondary mb-1">
+                <i class="bi bi-journal-text me-2"></i> Logs do Sistema
+            </h4>
+            <small class="text-muted">Histórico completo de auditoria e operações.</small>
+        </div>
+        
+        <span class="badge bg-secondary rounded-pill px-3 py-2">
+            Total: {{ logs|length }}
+        </span>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-9 mb-2">
+            <div class="d-flex align-items-center search-bar shadow-sm">
+                <i class="bi bi-search text-muted me-2"></i>
+                <input type="text" id="searchInput" placeholder="Buscar por usuário, ação ou detalhe..." onkeyup="filtrarLogs()">
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <select class="form-select shadow-sm border-0 py-2" id="filtroAcao" onchange="filtrarLogs()">
+                <option value="">Todas as ações</option>
+                <option value="Adicionar">Cadastros</option>
+                <option value="Editar">Edições</option>
+                <option value="Demitir">Demissões</option>
+                <option value="Ferias">Férias</option>
+                <option value="Ponto">Ponto</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            
+            <div id="listaLogs">
+                {% for log in logs %}
+                    
+                    {% set icon_class = 'bi-info-circle-fill' %}
+                    {% set color_style = 'secondary' %}
+                    {% set border_class = '' %}
+                    {% set bg_icon_class = 'bg-light text-secondary' %}
+
+                    {% if 'Adicionar' in log.acao or 'Cadastrar' in log.acao %}
+                        {% set icon_class = 'bi-person-plus-fill' %}
+                        {% set color_style = 'success' %}
+                        {% set border_class = 'border-add' %}
+                        {% set bg_icon_class = 'bg-icon-add' %}
+                    
+                    {% elif 'Editar' in log.acao %}
+                        {% set icon_class = 'bi-pencil-fill' %}
+                        {% set color_style = 'warning' %}
+                        {% set border_class = 'border-edit' %}
+                        {% set bg_icon_class = 'bg-icon-edit' %}
+
+                    {% elif 'Demitir' in log.acao %}
+                        {% set icon_class = 'bi-person-x-fill' %}
+                        {% set color_style = 'danger' %}
+                        {% set border_class = 'border-del' %}
+                        {% set bg_icon_class = 'bg-icon-del' %}
+
+                    {% elif 'Ferias' in log.acao %}
+                        {% set icon_class = 'bi-airplane-fill' %}
+                        {% set color_style = 'info' %}
+                        {% set border_class = 'border-ferias' %}
+                        {% set bg_icon_class = 'bg-icon-ferias' %}
+
+                    {% elif 'Ponto' in log.acao %}
+                        {% set icon_class = 'bi-clock-fill' %}
+                        {% set color_style = 'primary' %}
+                        {% set border_class = 'border-ponto' %}
+                        {% set bg_icon_class = 'bg-icon-ponto' %}
+                    {% endif %}
+
+                    <div class="log-card p-3 shadow-sm {{ border_class }}">
+                        <div class="d-flex align-items-center">
+                            
+                            <div class="icon-box {{ bg_icon_class }}">
+                                <i class="bi {{ icon_class }}"></i>
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="badge bg-{{ color_style }} bg-opacity-10 text-{{ color_style }} rounded-pill border border-{{ color_style }}">
+                                        {{ log.acao }}
+                                    </span>
+                                    <small class="text-muted fw-bold">
+                                        <i class="bi bi-calendar3 me-1"></i> 
+                                        {{ log.timestamp.strftime('%d/%m/%Y %H:%M') if log.timestamp.strftime else log.timestamp }}
+                                    </small>
+                                </div>
+                                <h6 class="mb-0 text-dark">
+                                    Usuário responsável: <strong>{{ log.usuario }}</strong>
+                                </h6>
+                                <small class="text-muted text-truncate d-block" style="max-width: 600px;">
+                                    Detalhe/Alvo: {{ log.alvo }}
+                                </small>
+                            </div>
+                        </div>
+                        <span class="d-none busca-texto">{{ log.usuario }} {{ log.acao }} {{ log.alvo }}</span>
+                    </div>
+
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-folder2-open text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-3">Nenhum registro de log encontrado.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function filtrarLogs() {
+        var input = document.getElementById("searchInput").value.toUpperCase();
+        var select = document.getElementById("filtroAcao").value.toUpperCase();
+        
+        var container = document.getElementById("listaLogs");
+        var cards = container.getElementsByClassName("log-card");
+
+        for (var i = 0; i < cards.length; i++) {
+            // Pega o texto escondido e o texto visível do card
+            var textoCard = cards[i].innerText || cards[i].textContent;
+            var textoBusca = cards[i].querySelector('.busca-texto').innerText;
+            
+            // Verifica Filtro de Texto E Filtro de Categoria (Select)
+            var bateTexto = textoCard.toUpperCase().indexOf(input) > -1 || textoBusca.toUpperCase().indexOf(input) > -1;
+            var bateCategoria = (select === "") || (textoCard.toUpperCase().indexOf(select) > -1);
+
+            if (bateTexto && bateCategoria) {
+                cards[i].style.display = "";
+            } else {
+                cards[i].style.display = "none";
+            }
+        }
+    }
+</script>
+
+{% endblock %}
