@@ -13,17 +13,13 @@ from registro_ponto import RegistroPonto
 
 app = Flask(__name__)
 
-# --- CONFIGURAÇÕES ---
 app.config['SECRET_KEY'] = 'chave_secreta_do_souzza'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clinica.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Inicializa o banco com este app
 db.init_app(app)
 
-# ==============================================================================
 # ROTAS DE ACESSO (LOGIN / LOGOUT / HOME)
-# ==============================================================================
 
 @app.route('/')
 def index():
@@ -88,9 +84,7 @@ def logout():
     flash("Saiu com sucesso.", "info")
     return redirect('/login')
 
-# ==============================================================================
-# ROTAS DE GESTÃO DE FUNCIONÁRIOS (APENAS ADMIN)
-# ==============================================================================
+# ROTAS DE GESTÃO DE FUNCIONÁRIOS
 
 @app.route('/funcionarios')
 def funcionarios():
@@ -160,7 +154,6 @@ def cadastrar_banco():
         if novo_func:
             db.session.add(novo_func)
             
-            # --- REGISTRAR LOG ---
             log = RegistroLog(session['usuario_logado'], acao_log, f"Novo {tipo}: {novo_func.nome}")
             db.session.add(log)
             
@@ -248,9 +241,7 @@ def ferias(id):
         flash(f"{funcionario.nome} {estado} férias.", "info")
     return redirect('/funcionarios')
 
-# ==============================================================================
 # ROTA FINANCEIRA (FOLHA DE PAGAMENTO)
-# ==============================================================================
 
 @app.route('/folha', methods=['GET', 'POST'])
 def folha():
@@ -285,10 +276,8 @@ def folha():
                 'horas_extras': horas if func.tipo_func == 'medico' else '-'
             })
         
-        # --- AQUI ESTAVA FALTANDO O LOG ---
         if folha_calculada:
             qtd = len(folha_calculada)
-            # Soma o total pago para ficar bonito no log
             total_valor = sum(item['salario_liquido'] for item in folha_calculada)
             
             log = RegistroLog(
@@ -303,9 +292,7 @@ def folha():
             
     return render_template('folha.html', medicos=medicos, resultado=folha_calculada)
 
-# ==============================================================================
 # ROTAS DE PONTO
-# ==============================================================================
 
 @app.route('/ponto', methods=['GET', 'POST'])
 def ponto():
@@ -342,9 +329,8 @@ def ponto():
     
     return render_template('ponto.html', pontos=pontos, funcionarios=funcionarios, filtro_atual=filtro_id)
 
-# ==============================================================================
+
 # ROTA DE LOGS (CORRIGIDA)
-# ==============================================================================
 
 @app.route('/logs')
 def logs():
@@ -352,14 +338,11 @@ def logs():
         flash("Acesso restrito.", "danger")
         return redirect('/')
 
-    # AQUI ESTAVA O ERRO: Usamos RegistroLog, e não Log
     lista_logs = RegistroLog.query.order_by(RegistroLog.timestamp.desc()).all()
     
     return render_template('logs.html', logs=lista_logs)
 
-# ==============================================================================
 # ROTAS DO COLABORADOR
-# ==============================================================================
 
 @app.route('/area_colaborador/<int:id>')
 def area_colaborador(id):
@@ -410,9 +393,6 @@ def bater_ponto_acao(id, tipo):
     db.session.commit()
     return redirect(f'/area_colaborador/{id}')
 
-# ==============================================================================
-# INICIALIZAÇÃO
-# ==============================================================================
 
 if __name__ == '__main__':
     with app.app_context():

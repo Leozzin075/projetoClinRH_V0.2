@@ -2,7 +2,7 @@ from database import db
 from funcionario import Funcionario
 
 class Medico(Funcionario):
-    __tablename__ = 'medicos' # Tabela separada
+    __tablename__ = 'medicos'
 
     # Conecta com o ID da tabela pai
     id = db.Column(db.Integer, db.ForeignKey('funcionarios.id'), primary_key=True)

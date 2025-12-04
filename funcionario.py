@@ -1,8 +1,6 @@
 import datetime
-# Importamos o banco de dados
 from database import db
 
-# Agora herda de db.Model, mas mantém a lógica
 class Funcionario(db.Model):
     __tablename__ = 'funcionarios' # Nome da tabela
 

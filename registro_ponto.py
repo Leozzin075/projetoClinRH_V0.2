@@ -6,7 +6,7 @@ class RegistroPonto(db.Model):
     __tablename__ = 'pontos'
     
     id = db.Column(db.Integer, primary_key=True)
-    data = db.Column(db.String(10), nullable=False) # Formato YYYY-MM-DD
+    data = db.Column(db.String(10), nullable=False)
     hora_entrada = db.Column(db.String(5), nullable=True)
     hora_saida = db.Column(db.String(5), nullable=True)
     

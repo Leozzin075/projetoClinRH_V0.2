@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
 
-# Criamos o objeto db aqui, mas ele ainda não está ligado a nenhum app
 db = SQLAlchemy()
+
+#Inizializaçao do ORM, criado aqui para nao ter as importaçoes circulares e nao ocorrer travamentos
