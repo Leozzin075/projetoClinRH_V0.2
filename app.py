@@ -19,7 +19,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
-# ROTAS DE ACESSO (LOGIN / LOGOUT / HOME)
+# ROTAS DE ACESSO 
 
 @app.route('/')
 def index():
@@ -50,7 +50,6 @@ def login():
         login_form = request.form.get('login')
         senha_form = request.form.get('senha')
         
-        # 1. TENTATIVA ADMIN
         usuario_admin = Usuario.query.filter_by(login=login_form).first()
         
         if usuario_admin and usuario_admin.senha == senha_form:
@@ -59,7 +58,6 @@ def login():
             flash(f"Bem-vindo, Admin {usuario_admin.login}!", "success")
             return redirect('/') 
 
-        # 2. TENTATIVA FUNCIONÁRIO
         funcionario = Funcionario.query.filter_by(matricula=login_form).first()
         
         if funcionario and funcionario.cpf == senha_form:
@@ -241,7 +239,7 @@ def ferias(id):
         flash(f"{funcionario.nome} {estado} férias.", "info")
     return redirect('/funcionarios')
 
-# ROTA FINANCEIRA (FOLHA DE PAGAMENTO)
+# ROTA FINANCEIRA
 
 @app.route('/folha', methods=['GET', 'POST'])
 def folha():
